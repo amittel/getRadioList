@@ -104,7 +104,7 @@ class MainWindow(QMainWindow):
         self.genreList = genres.splitlines()
 
         self.genreCombo = QComboBox()
-        self.genrecombo.setFixedWidth(150)
+        self.genreCombo.setFixedWidth(150)
         self.genreCombo.currentIndexChanged.connect(self.genreSearch)
 
         self.genreCombo.addItem("choose Genre")
