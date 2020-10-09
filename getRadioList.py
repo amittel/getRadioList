@@ -12,13 +12,15 @@ http://www.radio-browser.info/webservice
 """
 ##############
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QPlainTextEdit, QLineEdit, QComboBox, QPushButton, QFileDialog,
-                             QAction, QMenu, QMessageBox)
+                             QWidget, QButtonGroup, QHBoxLayout, QVBoxLayout, QGroupBox, QAction, QMenu, QMessageBox,
+                             QLabel)
 from PyQt5.QtGui import QIcon, QTextCursor, QTextOption
 from PyQt5.QtCore import Qt, QUrl
 from radios import RadioBrowser
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 # from PyQt5.Qt import QClipboard
 from urllib import request
+import yaml
 
 genres = """Americana
 Bluegrass
@@ -44,6 +46,13 @@ Metal
 
 class MainWindow(QMainWindow):
     def __init__(self):
+        try:
+            with open('favs.yaml', 'r') as yaml_stream:
+                self.fav_list = yaml.load(yaml_stream, Loader=yaml.SafeLoader)
+        except:
+            print("Cannot read yaml config file, check formatting.")
+            self.fav_list = None
+
         super(MainWindow, self).__init__()
         self.setGeometry(0, 0, 700, 400)
         self.setContentsMargins(6, 6, 6, 6)
@@ -75,7 +84,15 @@ class MainWindow(QMainWindow):
         self.tb.addSeparator()
         self.tb.addWidget(self.genreCombo)
 
-        self.setCentralWidget(self.field)
+        # Main Layout
+        self.createFavoriteLayout()
+        self.mainWidget = QWidget(self)
+        self.mainLayout = QVBoxLayout(self.mainWidget)
+        self.mainLayout.addWidget(self.field)
+        self.mainLayout.addWidget(self.horizontalGroupBox)
+        self.mainWidget.setLayout(self.mainLayout)
+
+        self.setCentralWidget(self.mainWidget)
 
         # player ###
         self.player = QMediaPlayer()
@@ -117,6 +134,36 @@ class MainWindow(QMainWindow):
         self.searchField.addAction(QIcon.fromTheme("edit-find"), 0)
         self.searchField.setPlaceholderText("type search term and press RETURN ")
         self.searchField.returnPressed.connect(self.findStations)
+
+    def createFavoriteLayout(self):
+        self.horizontalGroupBox = QGroupBox("Favorites")
+        layout = QHBoxLayout()
+        if self.fav_list is not None:
+            self.buttongroup = QButtonGroup()
+            self.buttongroup.buttonClicked[int].connect(self.handleButtonClicked)
+
+            i = 1
+            for station in self.fav_list:
+                #print(station)
+                self.button = QPushButton(station, self)
+                self.buttongroup.addButton(self.button, i)
+                i = i + 1
+                layout.addWidget(self.button)
+        else:
+            l1 = QLabel()
+            l1.setText("No Favorites")
+            layout.addWidget(l1)
+
+        self.horizontalGroupBox.setLayout(layout)
+
+    def handleButtonClicked(self, id):
+        for button in self.buttongroup.buttons():
+            if button is self.buttongroup.button(id):
+                #print(button.text() + " Was Clicked ")
+                for station, url in self.fav_list.items():
+                    if station == button.text():
+                        #print(url[0])
+                        self.getURLtoPlay(True, station, url[0])
 
     def genreSearch(self):
         if self.genreCombo.currentIndex() > 0:
@@ -167,19 +214,25 @@ class MainWindow(QMainWindow):
             cmenu.addAction(self.helpAction)
         cmenu.exec_(self.field.mapToGlobal(point))
 
-    def getURLtoPlay(self):
+    def getURLtoPlay(self, fav=False, name="", url_fav=""):
         url = ""
-        tc = self.field.textCursor()
-        rtext = tc.selectedText().partition(",")[2]
-        stext = tc.selectedText().partition(",")[0]
-
-        if rtext.endswith(".pls"):
-            url = self.getURLfromPLS(rtext)
-        elif rtext.endswith(".m3u"):
-            url = self.getURLfromM3U(rtext)
+        stext =""
+        if fav:
+            # print("url_fav=",url_fav)
+            # print("name in func:", name)
+            stext = name
+            url = url_fav
         else:
-            url = rtext
-        print("stream url=", url)
+            tc = self.field.textCursor()
+            rtext = tc.selectedText().partition(",")[2]
+            stext = tc.selectedText().partition(",")[0]
+            if rtext.endswith(".pls") :
+                url = self.getURLfromPLS(rtext)
+            elif rtext.endswith(".m3u") :
+                url = self.getURLfromM3U(rtext)
+            else:
+                url = rtext
+        # print("stream url=", url)
         self.player.setMedia(QMediaContent(QUrl(url)))
         self.player.play()
         self.statusBar().showMessage("%s %s" % ("playing", stext), 0)
