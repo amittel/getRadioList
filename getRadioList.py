@@ -11,17 +11,17 @@ radio-browser
 http://www.radio-browser.info/webservice
 """
 ##############
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QPlainTextEdit, QLineEdit, QComboBox, 
-                                                            QPushButton, QFileDialog, QAction, QMenu, QMessageBox)
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QPlainTextEdit, QLineEdit, QComboBox, QPushButton, QFileDialog,
+                             QAction, QMenu, QMessageBox)
 from PyQt5.QtGui import QIcon, QTextCursor, QTextOption
 from PyQt5.QtCore import Qt, QUrl
 from radios import RadioBrowser
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-#from PyQt5.Qt import QClipboard
+# from PyQt5.Qt import QClipboard
 from urllib import request
 
-genres ="""Americana
-Bluegrass 
+genres = """Americana
+Bluegrass
 Country
 New Country
 Classic Country
@@ -41,6 +41,7 @@ Beat
 Metal
 """
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -58,7 +59,7 @@ class MainWindow(QMainWindow):
         self.field.customContextMenuRequested.connect(self.contextMenuRequested)
         self.field.cursorPositionChanged.connect(self.selectLine)
         self.field.setWordWrapMode(QTextOption.NoWrap)
-        ### genre box
+        # genre box
         self.combo = QComboBox()
         self.combo.currentIndexChanged.connect(self.comboSearch)
         self.combo.addItem("choose Genre")
@@ -66,13 +67,13 @@ class MainWindow(QMainWindow):
             self.combo.addItem(m)
         self.combo.addItem("Country")
         self.combo.setFixedWidth(150)
-        ### toolbar ###
+        # toolbar ###
         self.tb = self.addToolBar("tools")
         self.tb.setContextMenuPolicy(Qt.PreventContextMenu)
         self.tb.setMovable(False)
 #        self.tb.setContentMargins(0, #0, 0, 6)
         self.setStyleSheet("QPlainTextEdit {background: #e9e9e9; font-size: 8pt; border: 1px outset #babdb6;} \
-                                                                   QStatusBar { background: transparent; color: #888a85; border: 0px; font-size: 8pt;}QToolBar \
+                                                                   QStatusBar { background: transparent; color: #888a85;border: 0px; font-size: 8pt;}QToolBar \
                                                                     {background: transparent; border: 0px;} QPushButton{background: #d3d7cf; \
                                                                             font-size: 8pt;} QLineEdit{background: #eeeeec; font-size: 8pt;}")
         self.saveButton = QPushButton("Save as txt")
@@ -87,7 +88,7 @@ class MainWindow(QMainWindow):
         self.tb.addWidget(self.savePlaylistButton)
         self.tb.addSeparator()
         self.tb.addWidget(self.combo)
-        ### player ###
+        # player ###
         self.player = QMediaPlayer()
         self.player.metaDataChanged.connect(self.metaDataChanged)
         self.startButton = QPushButton("Play")
@@ -98,7 +99,7 @@ class MainWindow(QMainWindow):
         self.stopButton.clicked.connect(self.stopPlayer)
         self.statusBar().addPermanentWidget(self.startButton)
         self.statusBar().addPermanentWidget(self.stopButton)
-        ## actions
+        # actions
         self.getNameAction = QAction(QIcon.fromTheme("edit-copy"), "copy Station Name", self, triggered=self.getName)
         self.getUrlAction = QAction(QIcon.fromTheme("edit-copy"), "copy Station URL", self, triggered=self.getURL)
         self.getNameAndUrlAction = QAction(QIcon.fromTheme("edit-copy"), "copy Station Name,URL", self, triggered=self.getNameAndUrl)
@@ -129,27 +130,26 @@ class MainWindow(QMainWindow):
         t = self.field.textCursor().selectedText()
         clip = QApplication.clipboard()
         clip.setText(t)
-        
+
     def selectLine(self):
         tc = self.field.textCursor()
         tc.select(QTextCursor.LineUnderCursor)
-        tc.movePosition(QTextCursor.StartOfLine, QTextCursor.MoveAnchor) ##, 
+        tc.movePosition(QTextCursor.StartOfLine, QTextCursor.MoveAnchor)
         tc.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
         self.field.setTextCursor(tc)
 
     def showHelp(self):
-        QMessageBox.information(self, "Information", "F6 -> play Station (from line where cursor is)\nF7 -> stop playing")
+        QMessageBox.information(self, "Information", "F6 -> play Station (from line where cursor is)\n\
+                                                      F7 -> stop playing")
 
     def stopPlayer(self):
         self.player.stop()
         self.statusBar().showMessage("Player stopped", 0)
 
-    ### QPlainTextEdit contextMenu
+    # QPlainTextEdit contextMenu
     def contextMenuRequested(self, point):
         cmenu = QMenu()
-#        cmenu = self.field.createStandardContextMenu()
         if not self.field.toPlainText() == "":
-#            cmenu.addSeparator()
             cmenu.addAction(self.getNameAction)
             cmenu.addAction(self.getUrlAction)
             cmenu.addAction(self.getNameAndUrlAction)
@@ -158,17 +158,17 @@ class MainWindow(QMainWindow):
             cmenu.addAction(self.stopPlayerAction)
             cmenu.addSeparator()
             cmenu.addAction(self.helpAction)
-        cmenu.exec_(self.field.mapToGlobal(point))  
+        cmenu.exec_(self.field.mapToGlobal(point))
 
     def getURLtoPlay(self):
         url = ""
         tc = self.field.textCursor()
         rtext = tc.selectedText().partition(",")[2]
         stext = tc.selectedText().partition(",")[0]
-#        print(rtext)
-        if rtext.endswith(".pls") :
+
+        if rtext.endswith(".pls"):
             url = self.getURLfromPLS(rtext)
-        elif rtext.endswith(".m3u") :
+        elif rtext.endswith(".m3u"):
             url = self.getURLfromM3U(rtext)
         else:
             url = rtext
@@ -181,17 +181,16 @@ class MainWindow(QMainWindow):
         if self.player.isMetaDataAvailable():
             trackInfo = (self.player.metaData("Title"))
             trackInfo2 = (self.player.metaData("Comment"))
-            if not trackInfo == None:
+            if trackInfo is not None:
                 self.statusBar().showMessage(trackInfo, 0)
-                if not trackInfo2 == None:
-                   self.statusBar().showMessage("%s %s" % (trackInfo, trackInfo2))
+                if trackInfo2 is not None:
+                    self.statusBar().showMessage("%s %s" % (trackInfo, trackInfo2))
 
     def getURLfromPLS(self, inURL):
         if "&" in inURL:
             inURL = inURL.partition("&")[0]
         response = request.urlopen(inURL)
         html = response.read().decode("utf-8").splitlines()
-        #print(html)
         if len(html) > 3:
             if "http" in str(html[1]):
                 t = str(html[1])
@@ -234,17 +233,17 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage("searching ...")
         rb = RadioBrowser()
         myparams = {'name': 'search', 'nameExact': 'false'}
-        
+
         for key in myparams.keys():
-                if key == "name":
-                    myparams[key] = mysearch
-        
+            if key == "name":
+                myparams[key] = mysearch
+
         r = rb.station_search(params=myparams)
-        
+
         n = ""
         m = ""
         for i in range(len(r)):
-            for key,value in r[i].items():
+            for key, value in r[i].items():
                 if str(key) == "name":
                     n = value.replace(",", " ")
         #            print (n)
@@ -253,14 +252,16 @@ class MainWindow(QMainWindow):
                     self.field.appendPlainText("%s,%s" % (n, m))
 #        self.combo.setCurrentIndex(0)
         if not self.field.toPlainText() == "":
-            self.statusBar().showMessage("found "+ str(self.field.toPlainText().count('\n')+1) + " '" + self.findfield.text() + "' Stations")
+            self.statusBar().showMessage("found " + str(self.field.toPlainText().count('\n')+1) + " '" +
+                                         self.findfield.text() + "' Stations")
         else:
             self.statusBar().showMessage("nothing found", 0)
 #        self.field.textCursor().movePosition(QTextCursor.Start, Qt.MoveAnchor)
 
     def saveStations(self):
         if not self.field.toPlainText() == "":
-            path, _ = QFileDialog.getSaveFileName(None, "RadioStations", self.findfield.text() + ".txt", "Text Files (*.txt)")
+            path, _ = QFileDialog.getSaveFileName(None, "RadioStations", self.findfield.text() +
+                                                  ".txt", "Text Files (*.txt)")
             if path:
                 s = self.field.toPlainText()
                 with open(path, 'w') as f:
@@ -270,7 +271,8 @@ class MainWindow(QMainWindow):
 
     def savePlaylist(self):
         if not self.field.toPlainText() == "":
-            path, _ = QFileDialog.getSaveFileName(None, "RadioStations", self.findfield.text() + ".m3u", "Playlist Files (*.m3u)")
+            path, _ = QFileDialog.getSaveFileName(None, "RadioStations", self.findfield.text() + ".m3u",
+                                                  "Playlist Files (*.m3u)")
             if path:
                 result = ""
                 s = self.field.toPlainText()
@@ -280,7 +282,7 @@ class MainWindow(QMainWindow):
                 result += "#EXTM3U"
                 result += '\n'
                 for x in range(len(st)):
-                    result += "#EXTINF:" + str(x) + "," +  st[x].partition(",")[0]
+                    result += "#EXTINF:" + str(x) + "," + st[x].partition(",")[0]
                     result += '\n'
                     result += st[x].partition(",")[2]
                     result += '\n'
@@ -288,6 +290,7 @@ class MainWindow(QMainWindow):
                     f.write(result)
                     f.close()
                     self.statusBar().showMessage("saved!", 0)
+
 
 if __name__ == '__main__':
 
@@ -298,4 +301,3 @@ if __name__ == '__main__':
     mainWin.show()
     mainWin.findfield.setFocus()
     sys.exit(app.exec_())
-    
