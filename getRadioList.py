@@ -47,47 +47,36 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.setGeometry(0, 0, 700, 400)
         self.setContentsMargins(6, 6, 6, 6)
-        self.setWindowTitle("Radio Stations - searching with pyradios")
-        self.genreList = genres.splitlines()
-        self.findfield = QLineEdit()
-        self.findfield.setFixedWidth(250)
-        self.findfield.addAction(QIcon.fromTheme("edit-find"), 0)
-        self.findfield.setPlaceholderText("type search term and press RETURN ")
-        self.findfield.returnPressed.connect(self.findStations)
+        self.setWindowTitle("pyRadioQt")
+
+        self.uiGenreCombo()
+        self.uiSearchField()
+
         self.field = QPlainTextEdit()
         self.field.setContextMenuPolicy(Qt.CustomContextMenu)
         self.field.customContextMenuRequested.connect(self.contextMenuRequested)
         self.field.cursorPositionChanged.connect(self.selectLine)
         self.field.setWordWrapMode(QTextOption.NoWrap)
-        # genre box
-        self.combo = QComboBox()
-        self.combo.currentIndexChanged.connect(self.comboSearch)
-        self.combo.addItem("choose Genre")
-        for m in self.genreList:
-            self.combo.addItem(m)
-        self.combo.addItem("Country")
-        self.combo.setFixedWidth(150)
-        # toolbar ###
-        self.tb = self.addToolBar("tools")
-        self.tb.setContextMenuPolicy(Qt.PreventContextMenu)
-        self.tb.setMovable(False)
-#        self.tb.setContentMargins(0, #0, 0, 6)
-        self.setStyleSheet("QPlainTextEdit {background: #e9e9e9; font-size: 8pt; border: 1px outset #babdb6;} \
-                                                                   QStatusBar { background: transparent; color: #888a85;border: 0px; font-size: 8pt;}QToolBar \
-                                                                    {background: transparent; border: 0px;} QPushButton{background: #d3d7cf; \
-                                                                            font-size: 8pt;} QLineEdit{background: #eeeeec; font-size: 8pt;}")
+
         self.saveButton = QPushButton("Save as txt")
         self.saveButton.setIcon(QIcon.fromTheme("document-save"))
         self.saveButton.clicked.connect(self.saveStations)
         self.savePlaylistButton = QPushButton("Save as m3u")
         self.savePlaylistButton.setIcon(QIcon.fromTheme("document-save"))
         self.savePlaylistButton.clicked.connect(self.savePlaylist)
-        self.setCentralWidget(self.field)
-        self.tb.addWidget(self.findfield)
+
+        # Toolbar
+        self.tb = self.addToolBar("tools")
+        self.tb.setContextMenuPolicy(Qt.PreventContextMenu)
+        self.tb.setMovable(False)
+        self.tb.addWidget(self.searchField)
         self.tb.addWidget(self.saveButton)
         self.tb.addWidget(self.savePlaylistButton)
         self.tb.addSeparator()
-        self.tb.addWidget(self.combo)
+        self.tb.addWidget(self.genreCombo)
+
+        self.setCentralWidget(self.field)
+
         # player ###
         self.player = QMediaPlayer()
         self.player.metaDataChanged.connect(self.metaDataChanged)
@@ -111,9 +100,27 @@ class MainWindow(QMainWindow):
         self.addAction(self.helpAction)
         self.statusBar().showMessage("Welcome", 0)
 
-    def comboSearch(self):
-        if self.combo.currentIndex() > 0:
-            self.findfield.setText(self.combo.currentText())
+    def uiGenreCombo(self):
+        self.genreList = genres.splitlines()
+
+        self.genreCombo = QComboBox()
+        self.genrecombo.setFixedWidth(150)
+        self.genreCombo.currentIndexChanged.connect(self.genreSearch)
+
+        self.genreCombo.addItem("choose Genre")
+        for m in self.genreList:
+            self.genreCombo.addItem(m)
+
+    def uiSearchField(self):
+        self.searchField = QLineEdit()
+        self.searchField.setFixedWidth(250)
+        self.searchField.addAction(QIcon.fromTheme("edit-find"), 0)
+        self.searchField.setPlaceholderText("type search term and press RETURN ")
+        self.searchField.returnPressed.connect(self.findStations)
+
+    def genreSearch(self):
+        if self.genreCombo.currentIndex() > 0:
+            self.searchField.setText(self.genreCombo.currentText())
             self.findStations()
 
     def getName(self):
@@ -229,7 +236,7 @@ class MainWindow(QMainWindow):
 
     def findStations(self):
         self.field.setPlainText("")
-        mysearch = self.findfield.text()
+        mysearch = self.searchField.text()
         self.statusBar().showMessage("searching ...")
         rb = RadioBrowser()
         myparams = {'name': 'search', 'nameExact': 'false'}
@@ -253,14 +260,14 @@ class MainWindow(QMainWindow):
 #        self.combo.setCurrentIndex(0)
         if not self.field.toPlainText() == "":
             self.statusBar().showMessage("found " + str(self.field.toPlainText().count('\n')+1) + " '" +
-                                         self.findfield.text() + "' Stations")
+                                         self.searchField.text() + "' Stations")
         else:
             self.statusBar().showMessage("nothing found", 0)
 #        self.field.textCursor().movePosition(QTextCursor.Start, Qt.MoveAnchor)
 
     def saveStations(self):
         if not self.field.toPlainText() == "":
-            path, _ = QFileDialog.getSaveFileName(None, "RadioStations", self.findfield.text() +
+            path, _ = QFileDialog.getSaveFileName(None, "RadioStations", self.searchField.text() +
                                                   ".txt", "Text Files (*.txt)")
             if path:
                 s = self.field.toPlainText()
@@ -271,7 +278,7 @@ class MainWindow(QMainWindow):
 
     def savePlaylist(self):
         if not self.field.toPlainText() == "":
-            path, _ = QFileDialog.getSaveFileName(None, "RadioStations", self.findfield.text() + ".m3u",
+            path, _ = QFileDialog.getSaveFileName(None, "RadioStations", self.searchField.text() + ".m3u",
                                                   "Playlist Files (*.m3u)")
             if path:
                 result = ""
@@ -299,5 +306,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWin = MainWindow()
     mainWin.show()
-    mainWin.findfield.setFocus()
+    mainWin.searchField.setFocus()
     sys.exit(app.exec_())
