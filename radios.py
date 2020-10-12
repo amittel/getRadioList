@@ -1,8 +1,5 @@
 import requests
 
-from xml.etree import ElementTree
-from urllib.parse import urljoin
-
 from constants import endpoints, BASE_URL
 
 
@@ -15,7 +12,7 @@ def request(endpoint, **kwargs):
     else:
         content_type = f"application/{fmt}"
 
-    headers = {"content-type": content_type, "User-Agent": "pyradios/dev"}
+    headers = {"content-type": content_type, "User-Agent": "pyradioqt/0.9"}
 
     params = kwargs.get("params", {})
 

@@ -216,7 +216,7 @@ class MainWindow(QMainWindow):
 
     def getURLtoPlay(self, fav=False, name="", url_fav=""):
         url = ""
-        stext =""
+        stext = ""
         if fav:
             # print("url_fav=",url_fav)
             # print("name in func:", name)
@@ -226,9 +226,9 @@ class MainWindow(QMainWindow):
             tc = self.field.textCursor()
             rtext = tc.selectedText().partition(",")[2]
             stext = tc.selectedText().partition(",")[0]
-            if rtext.endswith(".pls") :
+            if rtext.endswith(".pls"):
                 url = self.getURLfromPLS(rtext)
-            elif rtext.endswith(".m3u") :
+            elif rtext.endswith(".m3u"):
                 url = self.getURLfromM3U(rtext)
             else:
                 url = rtext
