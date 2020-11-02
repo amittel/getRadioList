@@ -57,11 +57,13 @@ class MainWindow(QMainWindow):
         self.setGeometry(0, 0, 700, 400)
         self.setContentsMargins(6, 6, 6, 6)
         self.setWindowTitle("pyRadioQt")
+        self.setWindowIcon(QIcon('./icon/icon.png'))
 
         self.uiGenreCombo()
         self.uiSearchField()
 
-        self.pix = QPixmap('./icon/icon.png')
+        self.path = './icon/icon.png'
+        self.pix = QPixmap(self.path)
         self.label_image = QLabel()
         self.label_image.setPixmap(QPixmap(self.pix))
 
@@ -242,6 +244,7 @@ class MainWindow(QMainWindow):
             else:
                 url = rtext
         # print("stream url=", url)
+
         self.player.setMedia(QMediaContent(QUrl(url)))
         self.player.play()
         self.statusBar().showMessage("%s %s" % ("playing", stext), 0)
@@ -294,6 +297,7 @@ class MainWindow(QMainWindow):
             t = str(html[0])
         url = t.partition("'")[2].partition("'")[0]
 #        print(url)
+
         return (url)
 
     def findStations(self):
@@ -307,12 +311,15 @@ class MainWindow(QMainWindow):
             if key == "name":
                 myparams[key] = mysearch
 
-        r = rb.station_search(params=myparams)
+        self.r = rb.station_search(params=myparams)
 
         n = ""
         m = ""
-        for i in range(len(r)):
-            for key, value in r[i].items():
+        for i in range(len(self.r)):
+            for key, value in self.r[i].items():
+                if str(key) == "favicon":
+                    self.path = value
+                    print(self.path)
                 if str(key) == "name":
                     n = value.replace(",", " ")
         #            print (n)
@@ -366,7 +373,9 @@ if __name__ == '__main__':
     import sys
 
     app = QApplication(sys.argv)
+
     mainWin = MainWindow()
+    
     mainWin.show()
     mainWin.searchField.setFocus()
     sys.exit(app.exec_())
