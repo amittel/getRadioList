@@ -14,7 +14,7 @@ http://www.radio-browser.info/webservice
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QPlainTextEdit, QLineEdit, QComboBox, QPushButton, QFileDialog,
                              QWidget, QButtonGroup, QHBoxLayout, QVBoxLayout, QGroupBox, QAction, QMenu, QMessageBox,
                              QLabel)
-from PyQt5.QtGui import QIcon, QTextCursor, QTextOption
+from PyQt5.QtGui import QIcon, QTextCursor, QTextOption, QPixmap
 from PyQt5.QtCore import Qt, QUrl
 from radios import RadioBrowser
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
@@ -61,6 +61,10 @@ class MainWindow(QMainWindow):
         self.uiGenreCombo()
         self.uiSearchField()
 
+        self.pix = QPixmap('./icon/icon.png')
+        self.label_image = QLabel()
+        self.label_image.setPixmap(QPixmap(self.pix))
+
         self.field = QPlainTextEdit()
         self.field.setContextMenuPolicy(Qt.CustomContextMenu)
         self.field.customContextMenuRequested.connect(self.contextMenuRequested)
@@ -88,7 +92,12 @@ class MainWindow(QMainWindow):
         self.createFavoriteLayout()
         self.mainWidget = QWidget(self)
         self.mainLayout = QVBoxLayout(self.mainWidget)
-        self.mainLayout.addWidget(self.field)
+
+        self.centerLayout = QHBoxLayout()
+        self.centerLayout.addWidget(self.label_image)
+        self.centerLayout.addWidget(self.field)
+        self.mainLayout.addLayout(self.centerLayout)
+
         self.mainLayout.addWidget(self.horizontalGroupBox)
         self.mainWidget.setLayout(self.mainLayout)
 
