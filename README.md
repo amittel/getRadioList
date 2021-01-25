@@ -1,3 +1,6 @@
+# PyInstaller
+` pyinstaller.exe .\getRadioList.spec`
+
 # getRadioList
 get a list of radio stations by searching http://www.radio-browser.info/webservice
 
