@@ -13,7 +13,7 @@ http://www.radio-browser.info/webservice
 ##############
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QPlainTextEdit, QLineEdit, QComboBox, QPushButton, QFileDialog,
                              QWidget, QButtonGroup, QHBoxLayout, QVBoxLayout, QGroupBox, QAction, QMenu, QMessageBox,
-                             QLabel)
+                             QLabel, QTableWidget, QTableWidgetItem)
 from PyQt5.QtGui import QIcon, QTextCursor, QTextOption, QPixmap
 from PyQt5.QtCore import Qt, QUrl
 from radios import RadioBrowser
